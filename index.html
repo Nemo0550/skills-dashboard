@@ -65,6 +65,26 @@ h1 em{font-style:italic;color:var(--yellow)}
 .empty{text-align:center;padding:60px 20px;color:rgba(255,253,231,.6)}
 .error-box{max-width:620px;margin:40px auto;background:var(--card);color:#1a0a2e;border:3px solid #000;box-shadow:5px 5px 0 #000;border-radius:6px;padding:24px;line-height:1.5}
 .error-box code{background:#1a0a2e;color:var(--yellow);padding:2px 6px;border-radius:4px;font-size:13px}
+.audit-wrap{margin:28px 0 0}
+.audit-panel{background:var(--card);color:#1a0a2e;border:3px solid #000;box-shadow:5px 5px 0 #000;border-radius:6px;padding:22px 24px}
+.audit-heading{font-size:1.05rem;font-weight:800;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.audit-meta{font-size:11px;font-weight:600;color:#8a7a9a}
+.audit-top{display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin-bottom:18px;padding-bottom:16px;border-bottom:2px solid rgba(0,0,0,.1)}
+.health-score{text-align:center;flex-shrink:0}
+.health-num{font-size:3rem;font-weight:900;line-height:1}
+.health-num.green{color:#22c55e}.health-num.orange{color:var(--accent)}.health-num.red{color:var(--pink)}
+.health-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8a7a9a;margin-top:4px}
+.audit-counts{display:flex;gap:20px;flex-wrap:wrap}
+.acount{text-align:center}
+.acount-num{font-size:1.5rem;font-weight:900;line-height:1}
+.acount-label{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#8a7a9a;margin-top:3px}
+.audit-recs{display:flex;flex-direction:column;gap:9px}
+.rec{display:flex;gap:10px;align-items:flex-start;padding:11px 13px;background:rgba(26,10,46,.05);border-radius:5px;border:1.5px solid rgba(0,0,0,.08)}
+.rec-badge{flex-shrink:0;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;border-radius:3px;border:2px solid #000;margin-top:2px}
+.pri-high{background:var(--pink);color:#fff}.pri-medium{background:var(--accent);color:#fff}.pri-low{background:var(--yellow);color:#000}
+.rec-title{font-weight:800;font-size:13.5px;line-height:1.2;margin-bottom:3px}
+.rec-detail{font-size:12.5px;color:#5a4a6a;line-height:1.4;margin-bottom:4px}
+.rec-action{font-size:12px;font-weight:700;color:var(--pink-deep)}
 @media (max-width:640px){
   .container{padding:0 14px}
   header{padding:20px 0 0}
@@ -105,6 +125,7 @@ h1 em{font-style:italic;color:var(--yellow)}
     <div class="filters" id="filters"></div>
   </div>
 </header>
+<div id="audit" class="container audit-wrap"></div>
 <main class="container" id="content"></main>
 <script>
 const CATEGORY_ICONS = {
@@ -161,12 +182,41 @@ function render(){
       '<div class="grid">'+items.map(cardHTML).join('')+'</div></section>';
   }).join('');
 }
+function scoreColor(n){return n>=80?'green':n>=60?'orange':'red'}
+function renderAudit(a){
+  const el=document.getElementById('audit');
+  if(!a||!a.healthScore){return;}
+  const s=a.summary||{};
+  const col=scoreColor(a.healthScore);
+  const flag=(n,c)=>n>0?`style="color:var(--${c})"`:' ';
+  const counts=[
+    {n:s.totalInstalled||0,l:'Installed'},
+    {n:s.inDashboard||0,l:'In Dashboard'},
+    {n:s.duplicates||0,l:'Duplicates',warn:'pink'},
+    {n:s.overlaps||0,l:'Overlaps',warn:'accent'},
+    {n:s.uncataloged||0,l:'Uncataloged',warn:'pink'}
+  ].map(c=>`<div class="acount"><div class="acount-num"${c.warn&&c.n>0?` style="color:var(--${c.warn})"`:''} >${c.n}</div><div class="acount-label">${c.l}</div></div>`).join('');
+  const recs=(a.recommendations||[]).map(r=>`<div class="rec">
+    <span class="rec-badge pri-${esc(r.priority)}">${esc(r.priority)}</span>
+    <div><div class="rec-title">${esc(r.title)}</div>
+    <div class="rec-detail">${esc(r.detail)}</div>
+    <div class="rec-action">→ ${esc(r.action)}</div></div></div>`).join('');
+  el.innerHTML=`<div class="audit-panel">
+    <div class="audit-heading">🔍 System Health Audit<span class="audit-meta">Last run: ${esc(a.generatedAt||'')}</span></div>
+    <div class="audit-top">
+      <div class="health-score"><div class="health-num ${col}">${a.healthScore}</div><div class="health-label">Health Score</div></div>
+      <div class="audit-counts">${counts}</div>
+    </div>
+    ${recs?`<div class="audit-recs">${recs}</div>`:''}
+  </div>`;
+}
 function boot(data){
   SKILLS = Array.isArray(data.skills)?data.skills:[];
   setDate(data.lastUpdated);
   computeStats(); buildFilters(); render();
   document.getElementById('search').addEventListener('input',e=>{query=e.target.value;render();});
 }
+fetch('audit.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(a=>{if(a)renderAudit(a);}).catch(()=>{});
 fetch('skills.json',{cache:'no-store'})
   .then(r=>{if(!r.ok)throw new Error(r.status);return r.json();})
   .then(boot)

@@ -1,0 +1,43 @@
+{
+  "generatedAt": "2026-06-25",
+  "healthScore": 71,
+  "summary": {
+    "totalInstalled": 46,
+    "inDashboard": 31,
+    "duplicates": 0,
+    "overlaps": 2,
+    "bootstrap": 1,
+    "broken": 0,
+    "uncataloged": 12
+  },
+  "recommendations": [
+    {
+      "priority": "high",
+      "type": "uncataloged",
+      "title": "12 installed skills are missing from your dashboard",
+      "detail": "docx, pdf, pptx, xlsx, invoice-generator, contract-reviewer, receipt-scanner, video-clip-extractor, video-repurposer, slack-gif-creator, web-artifacts-builder, brand-guidelines",
+      "action": "Tell Claude to add these to your skills.json so they show up here"
+    },
+    {
+      "priority": "high",
+      "type": "overlap",
+      "title": "visual-page-builder and visual-explainer-test are nearly identical",
+      "detail": "Both create self-contained HTML pages that visually explain concepts. Their descriptions are almost word-for-word the same.",
+      "action": "Try both once, then uninstall whichever feels redundant"
+    },
+    {
+      "priority": "medium",
+      "type": "overlap",
+      "title": "slide-deck-builder and pptx both make presentations",
+      "detail": "slide-deck-builder makes rich HTML slide decks in your browser; pptx creates actual .pptx files you can open in Keynote or PowerPoint.",
+      "action": "Keep both if you use both formats — otherwise uninstall the one you never touch"
+    },
+    {
+      "priority": "low",
+      "type": "bootstrap",
+      "title": "Customize is a setup-only skill you may not need",
+      "detail": "The /customize skill mainly helps when first configuring your Cowork setup. Once you know the system, it rarely comes up.",
+      "action": "Safe to uninstall if you feel set up — reinstall anytime from the skill store"
+    }
+  ]
+}
